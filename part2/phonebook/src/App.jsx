@@ -3,6 +3,8 @@ import { useState, useEffect } from 'react'
 import Filter from './components/Filter'
 import PersonForm from './components/PersonForm'
 import Persons from './components/Persons'
+import Notification from './components/Notification'
+import Error from './components/Error'
 import personService from './services/persons'
 
 const App = () => {
@@ -10,6 +12,8 @@ const App = () => {
   const [newName, setNewName] = useState('')
   const [newNumber, setNewNumber] = useState('')
   const [filter, setFilter] = useState('')
+  const [notification, setNotification] = useState(null)
+  const [error, setError] = useState(null)
 
   const handleNewNameChange = (event) => {
     setNewName(event.target.value)
@@ -41,6 +45,14 @@ const App = () => {
             setNewName('')
             setNewNumber('')
             setPersons(persons.filter(p => p.id !== id).concat(response))
+            setNotification(`Updated number for ${newName}`)
+            setTimeout(() => {
+              setNotification(null)
+            }, 5000)
+          })
+          .catch(() => {
+            setError(`Information of ${newName} has already been removed from server`)
+            setPersons(persons.filter(p => p.id !== id))
           })
       }
     } else {
@@ -50,6 +62,10 @@ const App = () => {
           setNewName('')
           setNewNumber('')
           setPersons(persons.concat(response))
+          setNotification(`Added ${newName}`)
+          setTimeout(() => {
+            setNotification(null)
+          }, 5000)
         })
     }
   }
@@ -63,6 +79,9 @@ const App = () => {
   return (
     <div>
       <h2>Phonebook</h2>
+
+      <Notification message={notification}/>
+      <Error message={error}/>
 
       <Filter
         filter={filter}
