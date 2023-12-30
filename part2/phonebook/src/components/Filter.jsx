@@ -1,5 +1,3 @@
-
-
 const Filter = ({filter, handleFilterChange}) => (
   <>
     <p>filter shown with</p>

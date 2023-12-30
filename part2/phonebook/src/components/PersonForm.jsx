@@ -1,5 +1,3 @@
-
-
 const PersonForm = (props) => (
   <form onSubmit={props.addPerson}>
     <div>

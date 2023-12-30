@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react'
-import axios from 'axios'
 
 import Filter from './components/Filter'
 import PersonForm from './components/PersonForm'
 import Persons from './components/Persons'
+import personService from './services/persons'
 
 const App = () => {
   const [persons, setPersons] = useState([]) 
@@ -26,26 +26,39 @@ const App = () => {
   const addPerson = (event) => {
     event.preventDefault()
 
+    const person = {
+      name: newName,
+      number: newNumber,
+    }
+
     if (persons.map(p => p.name === newName).reduce((s,p) => (s || p))) {
-      alert(`${newName} is already added to phonebook`)
-    } else {
-      const newPerson = {
-        name: newName,
-        number: newNumber,
-        id: persons.length + 1,
+      /** alert(`${newName} is already added to phonebook`) */
+      if (window.confirm(`${newName} is already added to phonebook, replace the old number with a new one?`)) {
+        const id = persons.find(p => p.name === newName).id
+        personService
+          .update(person, id)
+          .then(response => {
+            setNewName('')
+            setNewNumber('')
+            setPersons(persons.filter(p => p.id !== id).concat(response))
+          })
       }
-      setPersons(persons.concat(newPerson))
-      setNewName('')
-      setNewNumber('')
+    } else {
+      personService
+        .create(person)
+        .then(response => {
+          setNewName('')
+          setNewNumber('')
+          setPersons(persons.concat(response))
+        })
     }
   }
 
   useEffect(() => {
-    axios
-      .get('http://localhost:3001/persons')
-      .then(response =>
-        setPersons(response.data))
-  })
+    personService
+      .readAll()
+      .then(response => setPersons(response))
+  }, [])
 
   return (
     <div>
@@ -71,6 +84,7 @@ const App = () => {
       <Persons
         persons={persons}
         filter={filter}
+        setPersons={setPersons}
       />
 
     </div>
